@@ -385,6 +385,7 @@ _Будет дорабатываться  впроцессе реализаци�
 ```javascript
 [
     {
+        `id`: 1234
         'user': {
             'nickname': 'Nagibator',
             'name': 'Lev Tolstoy',
@@ -406,6 +407,61 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
+### **GET Conversation info**
+
+**URL** `/conversations/[id]`
+
+**RESPONCE 200**
+
+```javascript
+{
+    'id': 1234
+    'user': {
+        'nickname': 'Nagibator',
+        'name': 'Lev Tolstoy',
+        'avatar': '/avatar/url'
+    },
+    'last_message': {
+        'text': 'Kek kek kek kek kek ...'
+        'author': 'AuthorNickname',
+        'created': '20-12-2017'
+    }
+}
+```
+
+---
+
+### **GET Conversation messages**
+
+**URL** `/conversations/[id]/messages/page/[pageNumber]`
+
+[id] - id диалога
+
+[pageNumber] - номер страницы получаемых сообщений - на странице до 25 сообщений
+
+**RESPONCE 200**
+
+```javascript
+[
+    {
+        'id': 12345
+        'author': 'AuthorNickname',
+        'created': '20-12-2017',
+        'text': 'Kek kek kek kek kek', 
+        'parent_id': 1012, // ID родительского сообщения. 0 - если корневое
+        'edited': 'False', // Редактировалось ли данное сообщение
+        'voted': 'True' // Добавлял ли текущий пользователь это сообщение в избранное
+        'votes': 2
+    },
+    // ...
+    {
+        // ...
+    }
+]
+```
+
+---
+
 ### **GET Chats list**
 
 **URL** `/chats/page/[pageNumber]`
@@ -417,16 +473,14 @@ _Будет дорабатываться  впроцессе реализаци�
 ```javascript
 [
     {
-        'chat': {
-            'Namve': 'Writers',
-            'avatar': '/avatar/url'
-        },
+        'id': 1234,
+        'name': 'Writers',
+        'avatar': '/avatar/url',
         'last_message': {
             'text': 'Kek kek kek kek kek ...'
             'sender': 'SenderNickname',
             'created': '20-12-2017'
         }
-        
     },
     // ...
     {
@@ -434,3 +488,201 @@ _Будет дорабатываться  впроцессе реализаци�
     }
 ]
 ```
+
+---
+
+### TODO: **GET Chat details**
+
+**URL** `/chats/[id]/details`
+
+**RESPONCE 200**
+
+```javascript
+{
+    'id': 1234,
+    'name': 'Writers',
+    'avatar': '/avatar/url',
+    'users_count': 12,
+    'admin': 'AdminsNickname',
+    'muted': 'True' // Если текущий пользователь замутил чат 
+}
+```
+
+---
+
+### TOOD: **GET Chat users**
+
+**URL** `/chats/[id]/users`
+
+**RESPONCE 200**
+
+```javascript
+[
+    {
+        'nickname': 'Nagibator',
+        'name': 'Lev Tolstoy',
+        'avatar': '/avatar/url'
+        'inviter': 'InviterNickname',
+        'canDelete': 'False' // Является ли данный пользователь дочерним по отношению к текущему в этом чате
+    }
+    // ... 
+    { }
+]
+```
+
+---
+
+### TODO: **GET Chat messages**
+
+**URL** `/chats/[id]/messages/page/[pageNumber]`
+
+до 25 сообщений на страницу
+
+**RESPONCE 200**
+
+```javascript
+[
+    {
+        'id': 12345
+        'author': 'AuthorNickname',
+        'created': '20-12-2017',
+        'text': 'Kek kek kek kek kek', 
+        'parent_id': 1012, // ID родительского сообщения. 0 - если корневое
+        'edited': 'False', // Редактировалось ли данное сообщение
+        'voted': 'True' // Добавлял ли текущий пользователь это сообщение в избранное
+        'votes': 2
+    },
+    // ...
+    {
+        // ...
+    }
+]
+```
+
+---
+
+### TODO: **POST Invite user to chat**
+
+**URL** `/user/[id]/invite/[chatId]`
+
+**RESPONCE 200** - empty
+
+---
+
+### TODO: **POST Edit chat**
+
+**URL** `/chats/[id]/edit`
+
+**REQUEST**
+
+Принцип такой же, как и с редактирование пользователя
+
+```javascript
+{
+    'name': 'New chat name',
+}
+```
+
+**RESPONCE 200**
+
+То же, что и в `/chats/[id]/details`
+
+---
+
+### TOOD: **POST Leave chat**
+
+**URL** `/chats/[id]/leave`
+
+**RESPONCE 200** - empty
+
+---
+
+### TODO: **POST Exclude user from chat**
+
+**URL** `/chats/[id]/exclude/[userId]`
+
+**RESPONCE 200** - empty
+
+---
+
+### TODO: **GET Voted messages** 
+
+**URL** ``
+
+**RESPONCE 200**
+
+```javascript
+```
+
+---
+
+### TODO: **GET Message**
+
+**URL** `/message/[id]/details`
+
+**RESPONCE 200**
+
+```javascript
+{
+    'id': 12345,
+    'text': 'message text',
+    'author': {
+        'nickname': 'AuthorNickname',
+        'name': 'Lev Tolstoy'
+    },
+    'created': '20-11-2017',
+    'votes': 12,
+    'voted': 'False',
+    'edited': 'True',
+    'parent_id': 123,
+    'conversation_id': 1245
+    // или 'chat_id': 1234,
+    // 'chat_name': 'Chat name' - если все-таки 'chat_id'
+}
+```
+
+---
+
+### TODO: **POST Cahnge vote for message**
+
+**URL** `/message/[id]/vote`
+
+**RESPONCE 200**
+
+```javascript
+{
+    'votes': 10,
+    'voted': 'False'
+}
+```
+
+---
+
+### TODO: **POST Edit message**
+
+**URL** `/message/[id]/edit`
+
+**REQUEST**
+
+Такой же принцип как и при редактировании всего остального
+
+```javascript
+{
+    'text': 'New message text',
+    'parent_id': 10 // ID родительского сообщения
+}
+```
+
+**RESPONCE 200**
+
+Ананлогично `/message/[id]/details`
+
+---
+
+### TODO: **POST Delete message**
+
+**URL** `/message/[id]/delete`
+
+**RESPONCE 200** - empty
+
+---
