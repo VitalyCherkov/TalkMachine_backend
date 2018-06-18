@@ -1,3 +1,18 @@
 from django.db import models
 
-# Create your models here.
+from UserProfile.models import UserProfile
+
+
+class Contact(models.Model):
+
+    owner = models.ForeignKey(
+        to=UserProfile,
+        on_delete=models.CASCADE,
+        related_query_name='own_contacts'
+    )
+
+    to_user = models.ForeignKey(
+        to=UserProfile,
+        on_delete=models.CASCADE,
+        related_query_name='in_contacts_of'
+    )

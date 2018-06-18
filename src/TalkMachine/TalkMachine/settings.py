@@ -37,6 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Other tools
+    'rest_framework',
+    'channels',
+
+    # Local apps
+    'UserProfile',
+    'Contacts',
+    'Conversations',
+    'Chats',
+    'Messages'
 ]
 
 MIDDLEWARE = [
@@ -103,9 +114,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -118,3 +129,27 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+"""
+-------------------------------------------------------------------------------
+DJANGO REST FRAMEWORK settings 
+-------------------------------------------------------------------------------
+"""
+
+
+"""
+-------------------------------------------------------------------------------
+DJANGO CHANNELS settings 
+-------------------------------------------------------------------------------
+"""
+
+
+"""
+-------------------------------------------------------------------------------
+LOCAL settings 
+-------------------------------------------------------------------------------
+"""
+
+CONSTANTS = {
+
+}

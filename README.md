@@ -491,7 +491,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **GET Chat details**
+### **GET Chat details**
 
 **URL** `/chats/[id]/details`
 
@@ -510,7 +510,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TOOD: **GET Chat users**
+### **GET Chat users**
 
 **URL** `/chats/[id]/users`
 
@@ -532,7 +532,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **GET Chat messages**
+### **GET Chat messages**
 
 **URL** `/chats/[id]/messages/page/[pageNumber]`
 
@@ -561,7 +561,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **POST Invite user to chat**
+### **POST Invite user to chat**
 
 **URL** `/user/[id]/invite/[chatId]`
 
@@ -569,7 +569,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **POST Edit chat**
+### **POST Edit chat**
 
 **URL** `/chats/[id]/edit`
 
@@ -589,7 +589,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TOOD: **POST Leave chat**
+### **POST Leave chat**
 
 **URL** `/chats/[id]/leave`
 
@@ -597,7 +597,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **POST Exclude user from chat**
+### **POST Exclude user from chat**
 
 **URL** `/chats/[id]/exclude/[userId]`
 
@@ -605,7 +605,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **GET Voted messages** 
+### **GET Voted messages** 
 
 **URL** ``
 
@@ -616,7 +616,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **GET Message**
+### **GET Message**
 
 **URL** `/message/[id]/details`
 
@@ -643,7 +643,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **POST Cahnge vote for message**
+### **POST Cahnge vote for message**
 
 **URL** `/message/[id]/vote`
 
@@ -658,7 +658,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **POST Edit message**
+### **POST Edit message**
 
 **URL** `/message/[id]/edit`
 
@@ -679,7 +679,7 @@ _Будет дорабатываться  впроцессе реализаци�
 
 ---
 
-### TODO: **POST Delete message**
+### **POST Delete message**
 
 **URL** `/message/[id]/delete`
 
