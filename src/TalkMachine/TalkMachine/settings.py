@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # Other tools
     'rest_framework',
+    'rest_framework.authtoken',
     'channels',
 
     # Local apps
@@ -47,7 +48,7 @@ INSTALLED_APPS = [
     'Contacts',
     'Conversations',
     'Chats',
-    'Messages'
+    'Messages',
 ]
 
 MIDDLEWARE = [
@@ -130,12 +131,24 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, '..', '..', 'static'),
+)
+
+# STATIC_ROOT = os.path.join(BASE_DIR, '..', '..', 'static')
+
 """
 -------------------------------------------------------------------------------
 DJANGO REST FRAMEWORK settings 
 -------------------------------------------------------------------------------
 """
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
+}
 
 """
 -------------------------------------------------------------------------------
