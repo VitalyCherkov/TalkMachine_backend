@@ -8,4 +8,7 @@ class IsNotAuthenticated(IsAuthenticated):
     message = USER_ALREADY_AUTHENTICATED_MSG
 
     def has_permission(self, request, view):
-        return not super(IsAuthenticated, self).has_permission(request, view)
+
+        not_logged_in = not super(IsNotAuthenticated, self).has_permission(request, view)
+        print("NL: ", not_logged_in, request.data, view)
+        return not_logged_in

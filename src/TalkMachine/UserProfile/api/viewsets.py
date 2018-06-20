@@ -2,25 +2,29 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import authentication
+from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
 
-from ..models import UserProfile
+from ..models import User
 
 from .permissions import IsNotAuthenticated
 from .serializers import UserSignupSerializer, UserLoginSerializer
 
 
 class UserSignupViewSet(viewsets.ModelViewSet):
-    queryset = UserProfile.objects.all()
+    queryset = User.objects.all()
     authentication_classes = (authentication.TokenAuthentication,)
     serializer_class = UserSignupSerializer
 
-    # def get_permissions(self):
-    #     permission_classes = []
-    #     if self.action == 'create' or self.action == 'login':
-    #         permission_classes = [IsNotAuthenticated]
-    #
-    #     return [permission() for permission in permission_classes]
+    def get_permissions(self):
+        permission_classes = []
+        print('action ', self.action)
+        if self.action == 'create':
+            permission_classes = [IsNotAuthenticated]
+        if self.action == 'login':
+            permission_classes = [IsNotAuthenticated]
+
+        return [permission() for permission in permission_classes]
 
     def _authenicate(self, user, json):
         print('USER: ', user)
@@ -38,6 +42,7 @@ class UserSignupViewSet(viewsets.ModelViewSet):
         user_profile = serializer.save()
         return self._authenicate(user=user_profile.user, json=serializer.data)
 
+    @action(methods=['post'], detail=True, permission_classes=[IsNotAuthenticated])
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -45,9 +50,14 @@ class UserSignupViewSet(viewsets.ModelViewSet):
         return Response(json, status=status.HTTP_201_CREATED)
 
     def logout(self, request):
-        Token.delete(request.user.auth_token)
+        try:
+            Token.delete(request.user.auth_token)
+        except Exception:
+            pass
+
         return Response(status=status.HTTP_200_OK)
 
+    @action(methods=['post'], detail=True, permission_classes=[IsNotAuthenticated])
     def login(self, request):
         print('LOGIN')
         print(request.data)
@@ -56,6 +66,13 @@ class UserSignupViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         json = self._authenicate(user=serializer.instance.user, json=serializer.data)
         return Response(json)
+
+    def retrieve_me(self, request, *args, **kwargs):
+        """
+        '/user/me'
+        """
+        pass
+
 
 
 
