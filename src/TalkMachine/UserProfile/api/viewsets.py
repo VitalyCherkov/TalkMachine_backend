@@ -2,13 +2,22 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import authentication
-from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+
+from django.shortcuts import get_object_or_404
 
 from ..models import User
 
 from .permissions import IsNotAuthenticated
-from .serializers import UserSignupSerializer, UserLoginSerializer
+from .serializers import (
+    UserSignupSerializer,
+    UserLoginSerializer,
+    UserMeSerializer,
+    UserDetailsSerializer,
+    UserShortSerializer,
+    UserUpdateSerializer,
+)
 
 
 class UserSignupViewSet(viewsets.ModelViewSet):
@@ -17,12 +26,11 @@ class UserSignupViewSet(viewsets.ModelViewSet):
     serializer_class = UserSignupSerializer
 
     def get_permissions(self):
-        permission_classes = []
         print('action ', self.action)
-        if self.action == 'create':
+        if self.action == 'create' or self.action == 'login':
             permission_classes = [IsNotAuthenticated]
-        if self.action == 'login':
-            permission_classes = [IsNotAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated]
 
         return [permission() for permission in permission_classes]
 
@@ -42,7 +50,6 @@ class UserSignupViewSet(viewsets.ModelViewSet):
         user_profile = serializer.save()
         return self._authenicate(user=user_profile.user, json=serializer.data)
 
-    @action(methods=['post'], detail=True, permission_classes=[IsNotAuthenticated])
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -57,7 +64,6 @@ class UserSignupViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=['post'], detail=True, permission_classes=[IsNotAuthenticated])
     def login(self, request):
         print('LOGIN')
         print(request.data)
@@ -67,11 +73,35 @@ class UserSignupViewSet(viewsets.ModelViewSet):
         json = self._authenicate(user=serializer.instance.user, json=serializer.data)
         return Response(json)
 
-    def retrieve_me(self, request, *args, **kwargs):
-        """
-        '/user/me'
-        """
-        pass
+    def get_object(self):
+        if 'username' in self.kwargs:
+            return get_object_or_404(
+                self.get_queryset(), username=self.kwargs['username']
+            )
+        else:
+            return self.request.user.user_profile
+
+    def retrieve_me(self, request):
+        print(self.get_object())
+        serializer = UserMeSerializer(instance=self.get_object())
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = self.get_object().user_profile
+        serializer_class = UserDetailsSerializer if 'details' in kwargs else UserShortSerializer
+        serializer = serializer_class(obj)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        serializer = UserUpdateSerializer(
+            instance=self.get_object(),
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data)
+
 
 
 

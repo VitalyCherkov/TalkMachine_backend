@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 
-from ..errors import EmailAlreadyInUse, UsernameAlreadyInUse
+from ..errors import EmailAlreadyInUse, UsernameAlreadyInUse, EmptyField
 from ..constants import USERNAME_MAX_LENGTH, PASSWORD_MAX_LENGTH, INCORRECT_CREDENTIALS
 from ..models import UserProfile
 
@@ -13,8 +13,11 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(source='user.username', read_only=True)
     bio = serializers.CharField(required=False, read_only=True)
-    first_name = serializers.CharField(required=False, read_only=True)
-    last_name = serializers.CharField(required=False, read_only=True)
+    bio = serializers.CharField(required=False, read_only=True)
+    first_name = serializers.CharField(source='user.first_name',
+                                       required=False, read_only=True)
+    last_name = serializers.CharField(source='user.last_name',
+                                      required=False, read_only=True)
 
     class Meta:
         model = UserProfile
@@ -52,8 +55,10 @@ class UserSignupSerializer(serializers.ModelSerializer):
                                      source='user.password', write_only=True)
 
     bio = serializers.CharField(required=False, read_only=True)
-    first_name = serializers.CharField(required=False, read_only=True)
-    last_name = serializers.CharField(required=False, read_only=True)
+    first_name = serializers.CharField(source='user.first_name',
+                                       required=False, read_only=True)
+    last_name = serializers.CharField(source='user.last_name',
+                                      required=False, read_only=True)
 
     class Meta:
         model = UserProfile
@@ -77,7 +82,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         try:
-            user = self.Meta.model.objects.get_user_by_username(username=value)
+            self.Meta.model.objects.get_user_by_username(username=value)
         except UserProfile.DoesNotExist:
             return value
 
@@ -94,17 +99,116 @@ class UserSignupSerializer(serializers.ModelSerializer):
         )
 
 
-class UserUpdateSerializer:
-    pass
-
-
-class UserMeSerializer:
-    pass
-
-
-class UserDetailsSerializer:
-    pass
-
-
 class UserShortSerializer(serializers.ModelSerializer):
-    pass
+    username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+        )
+
+
+class UserDetailsSerializer(UserShortSerializer):
+    bio = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = UserProfile
+
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'bio',
+        )
+
+
+class UserMeSerializer(UserDetailsSerializer):
+    email = serializers.CharField(source='user.email', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+        )
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, source='user.username')
+    email = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, source='user.email')
+    first_name = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, source='user.first_name')
+    last_name = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, source='user.last_name')
+    bio = serializers.CharField()
+    password = serializers.CharField(write_only=True, source='user.password')
+
+    class Meta:
+        model = UserProfile
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'password',
+        )
+
+    def validate_email(self, value):
+        if value == '':
+            error = EmptyField('email')
+            raise serializers.ValidationError(code=error.code, detail=error.detail)
+
+        try:
+            user = self.Meta.model.objects.get_user_by_email(email=value)
+            if user == self.instance:
+                return value
+        except UserProfile.DoesNotExist:
+            return value
+
+        error = EmailAlreadyInUse(value)
+        raise serializers.ValidationError(code=error.code, detail=error.detail)
+
+    def validate_username(self, value):
+        if value == '':
+            error = EmptyField('username')
+            raise serializers.ValidationError(code=error.code, detail=error.detail)
+
+        try:
+            user = self.Meta.model.objects.get_user_by_email(username=value)
+            if user == self.instance:
+                return value
+        except UserProfile.DoesNotExist:
+            return value
+
+        error = EmailAlreadyInUse(value)
+        raise serializers.ValidationError(code=error.code, detail=error.detail)
+
+    def validate_password(self, value):
+        if value == '':
+            error = EmptyField('password')
+            raise serializers.ValidationError(code=error.code, detail=error.detail)
+
+        return value
+
+    def update(self, instance, validated_data):
+        print('validated data: ', validated_data)
+
+        for field in self.Meta.fields:
+            if field in validated_data.get('user', {}):
+                setattr(instance, field, validated_data['user'][field])
+            elif field in validated_data:
+                setattr(instance, field, validated_data[field])
+
+        instance.save()
+        return instance
