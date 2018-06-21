@@ -93,13 +93,20 @@ class UserSignupViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
+        print('Request data: ', request.data)
+
+        instance = self.get_object()
+        print(instance)
+
         serializer = UserUpdateSerializer(
-            instance=self.get_object(),
+            instance=instance,
             data=request.data,
             partial=True
         )
-        serializer.is_valid()
-        serializer.save()
+        if serializer.is_valid(raise_exception=True):
+            print('Valid serializer')
+            serializer.save()
+
         return Response(serializer.data)
 
 

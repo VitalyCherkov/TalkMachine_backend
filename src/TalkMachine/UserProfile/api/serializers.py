@@ -146,11 +146,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         max_length=USERNAME_MAX_LENGTH, source='user.username')
     email = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH, source='user.email')
-    first_name = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH, source='user.first_name')
-    last_name = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH, source='user.last_name')
-    bio = serializers.CharField()
+    first_name = serializers.CharField(required=False,
+        max_length=USERNAME_MAX_LENGTH, source='user.first_name', allow_blank=True)
+    last_name = serializers.CharField(required=False,
+        max_length=USERNAME_MAX_LENGTH, source='user.last_name', allow_blank=True)
+    bio = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True, source='user.password')
 
     class Meta:
@@ -165,10 +165,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         )
 
     def validate_email(self, value):
-        if value == '':
-            error = EmptyField('email')
-            raise serializers.ValidationError(code=error.code, detail=error.detail)
-
         try:
             user = self.Meta.model.objects.get_user_by_email(email=value)
             if user == self.instance:
@@ -180,10 +176,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(code=error.code, detail=error.detail)
 
     def validate_username(self, value):
-        if value == '':
-            error = EmptyField('username')
-            raise serializers.ValidationError(code=error.code, detail=error.detail)
-
         try:
             user = self.Meta.model.objects.get_user_by_email(username=value)
             if user == self.instance:
@@ -194,21 +186,18 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         error = EmailAlreadyInUse(value)
         raise serializers.ValidationError(code=error.code, detail=error.detail)
 
-    def validate_password(self, value):
-        if value == '':
-            error = EmptyField('password')
-            raise serializers.ValidationError(code=error.code, detail=error.detail)
-
-        return value
-
     def update(self, instance, validated_data):
         print('validated data: ', validated_data)
 
         for field in self.Meta.fields:
             if field in validated_data.get('user', {}):
-                setattr(instance, field, validated_data['user'][field])
+                setattr(instance.user, field, validated_data['user'][field])
             elif field in validated_data:
                 setattr(instance, field, validated_data[field])
 
+        instance.user.save()
         instance.save()
+
+        print('saved instance: ', instance)
+
         return instance
