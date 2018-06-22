@@ -1,16 +1,16 @@
 from django.urls import path
 
-from .api.viewsets import UserSignupViewSet
+from .api.viewsets import UserProfileViewSet
 
 
-user_signup = UserSignupViewSet.as_view({'post': 'create'})
-user_logout = UserSignupViewSet.as_view({'post': 'logout'})
-user_login = UserSignupViewSet.as_view({'post': 'login'})
-user_me = UserSignupViewSet.as_view({
+user_signup = UserProfileViewSet.as_view({'post': 'create'})
+user_logout = UserProfileViewSet.as_view({'post': 'logout'})
+user_login = UserProfileViewSet.as_view({'post': 'login'})
+user_me = UserProfileViewSet.as_view({
     'get': 'retrieve_me',
     'post': 'update',
 })
-user_retrieve = UserSignupViewSet.as_view({'get': 'retrieve'})
+user_retrieve = UserProfileViewSet.as_view({'get': 'retrieve'})
 
 urlpatterns = [
     path('login', user_login, name='user-login'),

@@ -1,9 +1,9 @@
 from rest_framework import viewsets
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework import authentication
-from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 
 from django.shortcuts import get_object_or_404
 
@@ -20,7 +20,7 @@ from .serializers import (
 )
 
 
-class UserSignupViewSet(viewsets.ModelViewSet):
+class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     authentication_classes = (authentication.TokenAuthentication,)
     serializer_class = UserSignupSerializer

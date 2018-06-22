@@ -36,4 +36,3 @@ class UserProfileManager(models.Manager):
         user_profile.save()
 
         return user_profile
-
