@@ -1,7 +1,8 @@
 from django.db import models
 
-
 from UserProfile.models import UserProfile
+
+from .managers import ConversationsManager
 
 
 class Conversation(models.Model):
@@ -26,6 +27,8 @@ class Conversation(models.Model):
 
     deleted = models.BooleanField(default=False)
     favourite = models.BooleanField(default=False)
+
+    objects = ConversationsManager()
 
     def __str__(self):
         return '{0} -> {1}'.format(self.user1.user.username, self.user2.user.username)
