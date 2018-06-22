@@ -31,8 +31,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        print('NOT VALIDATED DATA', data)
-
         try:
             user = self.Meta.model.objects.get_user_by_email(email=data['user']['email'])
         except UserProfile.DoesNotExist:
@@ -90,8 +88,6 @@ class UserSignupSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(code=error.code, detail=error.detail)
 
     def create(self, validated_data):
-        print('VALIDATED DATA: ', validated_data)
-
         return UserProfile.objects.create(
             email=validated_data['user']['email'],
             username=validated_data['user']['username'],
@@ -118,7 +114,6 @@ class UserDetailsSerializer(UserShortSerializer):
 
     class Meta:
         model = UserProfile
-
         fields = (
             'username',
             'first_name',

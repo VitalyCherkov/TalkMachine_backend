@@ -3,8 +3,8 @@ from django.db import models
 from UserProfile.models import UserProfile
 from Chats.models import Chat
 
-from .constants import STATUS_CHOICES, DELIVERED
-from .managers import ConversationsManager
+from .constants import STATUS_CHOICES, DELIVERED, ROOT_MESSAGE_ID
+from .managers import ConversationsManager, MessagesManager
 
 
 class Conversation(models.Model):
@@ -26,6 +26,7 @@ class Conversation(models.Model):
     )
 
     last_msg_id = models.PositiveIntegerField(default=0)
+    last_msg_date = models.DateTimeField()
 
     deleted = models.BooleanField(default=False)
     favourite = models.BooleanField(default=False)
@@ -69,9 +70,14 @@ class Message(models.Model):
 
     text = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
-    parent_msg_id = models.PositiveIntegerField(default=0)
+    parent_msg_id = models.PositiveIntegerField(default=ROOT_MESSAGE_ID)
     is_edited = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
+
+    objects = MessagesManager()
+
+    def set_is_deleted(self):
+        self.is_deleted = False
 
     def __str__(self):
         return '[#{0}] - {1}'.format(self.pk, self.text)
