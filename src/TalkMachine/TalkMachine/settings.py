@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     # Local apps
     'UserProfile',
     'Contacts',
-    'Conversations',
     'Chats',
     'Messages',
 ]

@@ -1,10 +1,39 @@
 from django.db import models
 
 from UserProfile.models import UserProfile
-from Conversations.models import Conversation
 from Chats.models import Chat
 
 from .constants import STATUS_CHOICES, DELIVERED
+from .managers import ConversationsManager
+
+
+class Conversation(models.Model):
+
+    user1 = models.ForeignKey(
+        to=UserProfile,
+        related_name='conversations1',
+        related_query_name='conversations1',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    user2 = models.ForeignKey(
+        to=UserProfile,
+        related_name='conversations2',
+        related_query_name='conversations2',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    last_msg_id = models.PositiveIntegerField(default=0)
+
+    deleted = models.BooleanField(default=False)
+    favourite = models.BooleanField(default=False)
+
+    objects = ConversationsManager()
+
+    def __str__(self):
+        return '{0} -> {1}'.format(self.user1.user.username, self.user2.user.username)
 
 
 class Message(models.Model):
@@ -29,6 +58,13 @@ class Message(models.Model):
         max_length=1,
         choices=STATUS_CHOICES,
         default=DELIVERED
+    )
+
+    author = models.ForeignKey(
+        to=UserProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='own_messages'
     )
 
     text = models.TextField()
@@ -57,3 +93,4 @@ class Vote(models.Model):
 
     def __str__(self):
         return '{0} voted for [#{1}]'.format(self.user.user.username, self.message_id)
+
