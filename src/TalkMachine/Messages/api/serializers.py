@@ -1,5 +1,5 @@
 from rest_framework import serializers, exceptions
-from ..models import Message
+from ..models import Message, Conversation
 
 from UserProfile.models import UserProfile
 from UserProfile.errors import UserDoesNotExists
@@ -112,13 +112,13 @@ class MessageUpdateSerializer(serializers.ModelSerializer):
 
 class MessageDetailSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField(read_only=True)
-    text = serializers.CharField(read_only=True)
-    created = serializers.DateTimeField(read_only=True)
-    is_edited = serializers.BooleanField(read_only=True)
-    parent_msg_id = serializers.IntegerField(read_only=True)
+    # id = serializers.IntegerField(read_only=True)
+    # text = serializers.CharField(read_only=True)
+    # created = serializers.DateTimeField(read_only=True)
+    # is_edited = serializers.BooleanField(read_only=True)
+    # parent_msg_id = serializers.IntegerField(read_only=True)
     conversation_id = serializers.IntegerField(read_only=True, source='conversation.id')
-    author = UserShortSerializer(read_only=True)
+    # author = UserShortSerializer(read_only=True)
 
     class Meta:
         model = Message
@@ -151,3 +151,23 @@ class MessageShortSerializer(serializers.ModelSerializer):
             'parent_msg_id',
             'is_edited'
         )
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+
+    partner = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Conversation
+        fields = (
+            'id',
+            'partner',
+            'last_msg_date',
+            'last_msg_id'
+        )
+
+    def get_partner(self, obj):
+        own_user_profile = self.context['request'].user.user_profile
+        partner_user_profile = obj.get_partner_user_profile(own_user_profile)
+        serializer = UserShortSerializer(instance=partner_user_profile)
+        return serializer.data

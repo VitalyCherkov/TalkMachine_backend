@@ -9,6 +9,9 @@ message_delete = MessageViewSet.as_view({'post': 'destroy'})
 message_detail = MessageViewSet.as_view({'get': 'retrieve'})
 messages_list = MessageViewSet.as_view({'get': 'list'})
 
+conversations_list = ConversationViewSet.as_view({'get': 'list'})
+conversation_detail = ConversationViewSet.as_view({'get': 'retrieve'})
+
 urlpatterns = [
     path(
         'to/<username>',
@@ -34,5 +37,15 @@ urlpatterns = [
         'conversation/<conversation_id>/page/<page>',
         messages_list,
         name='messages-list'
+    ),
+    path(
+        'conversations/page/<page>',
+        conversations_list,
+        name='conversations-list'
+    ),
+    path(
+        'conversation/<conversation_id>',
+        conversation_detail,
+        name='conversation-detail'
     )
 ]

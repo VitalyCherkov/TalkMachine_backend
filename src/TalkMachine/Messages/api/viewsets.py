@@ -15,20 +15,14 @@ from .serializers import (
     MessageUpdateSerializer,
     MessageDetailSerializer,
     MessageShortSerializer,
+    ConversationSerializer,
 )
-
-
-class IsAuthenticatedTest(IsAuthenticated):
-    def has_permission(self, request, view):
-        res = super(IsAuthenticatedTest, self).has_permission(request, view)
-        print(res)
-        return res
 
 
 class MessageViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = [IsAuthenticatedTest]
+    permission_classes = [IsAuthenticated]
     lookup_url_kwarg = 'id'
 
     def get_permissions(self):
@@ -85,12 +79,13 @@ class ConversationViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = [IsAuthenticated]
-    lookup_url_kwarg = 'id'
+    lookup_url_kwarg = 'conversation_id'
+    serializer_class = ConversationSerializer
 
     def get_queryset(self):
         return Conversation.objects.get_conversations_by_user_profile(
-            self.request.user.user_profile)
-
+            self.request.user.user_profile
+        )
 
 
 

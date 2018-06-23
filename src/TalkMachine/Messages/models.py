@@ -33,6 +33,13 @@ class Conversation(models.Model):
 
     objects = ConversationsManager()
 
+    def get_partner_user_profile(self, user_profile):
+        if user_profile == self.user1:
+            return self.user2
+        elif user_profile == self.user2:
+            return self.user1
+        raise self.DoesNotExist
+
     def __str__(self):
         return '{0} -> {1}'.format(self.user1.user.username, self.user2.user.username)
 

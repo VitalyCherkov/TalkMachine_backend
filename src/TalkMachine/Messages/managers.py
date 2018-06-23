@@ -8,8 +8,9 @@ from UserProfile.models import UserProfile
 class ConversationsManager(models.Manager):
 
     def get_conversations_by_user_profile(self, user_profile):
-        return (user_profile.conversations1 | user_profile.conversations2)\
-            .order_by('-last_msg_date')
+        conversations1 = user_profile.conversations1.all()
+        conversations2 = user_profile.conversations2.all()
+        return (conversations1 | conversations2).order_by('-last_msg_date')
 
     def get_or_create_between(self, from_user_profile, to_user_profile):
         return self.get_or_create(
