@@ -136,7 +136,18 @@ class MessageDetailSerializer(serializers.ModelSerializer):
             # 'voted',
         )
 
+
 class MessageShortSerializer(serializers.ModelSerializer):
+
+    username = serializers.CharField(source='author.user.username')
 
     class Meta:
         model = Message
+        fields = (
+            'id',
+            'username',
+            'created',
+            'text',
+            'parent_msg_id',
+            'is_edited'
+        )

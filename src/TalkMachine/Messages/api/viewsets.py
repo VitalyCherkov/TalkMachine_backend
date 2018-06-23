@@ -76,6 +76,10 @@ class MessageViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
         serializer = MessageDetailSerializer(instance)
         return response.Response(serializer.data)
 
+    def list(self, request, *args, **kwargs):
+        self.serializer_class = MessageShortSerializer
+        return super(MessageViewSet, self).list(request, args, kwargs)
+
 
 class ConversationViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
 
