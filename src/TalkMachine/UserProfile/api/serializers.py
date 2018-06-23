@@ -2,17 +2,30 @@ from rest_framework import serializers
 
 
 from ..errors import EmailAlreadyInUse, UsernameAlreadyInUse, EmptyField
-from ..constants import USERNAME_MAX_LENGTH, PASSWORD_MAX_LENGTH, INCORRECT_CREDENTIALS
+from ..constants import (
+    USERNAME_MAX_LENGTH,
+    PASSWORD_MAX_LENGTH,
+    INCORRECT_CREDENTIALS,
+    PASSWORD_IS_REQUIRED,
+    EMAIL_IS_REQUIRED,
+    USERNAME_IS_REQUIRED,
+)
 from ..models import UserProfile
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(source='user.email', required=True)
-    password = serializers.CharField(source='user.password', write_only=True, required=True)
+    password = serializers.CharField(
+        source='user.password',
+        write_only=True,
+        required=True,
+        error_messages={
+            "required": PASSWORD_IS_REQUIRED
+        }
+    )
 
     username = serializers.CharField(source='user.username', read_only=True)
-    bio = serializers.CharField(required=False, read_only=True)
     bio = serializers.CharField(required=False, read_only=True)
     first_name = serializers.CharField(source='user.first_name',
                                        required=False, read_only=True)
@@ -29,6 +42,9 @@ class UserLoginSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name'
         )
+        extra_kwargs = {
+            'password': {'error_messages': {'required': PASSWORD_IS_REQUIRED}}
+        }
 
     def validate(self, data):
         try:
@@ -47,10 +63,25 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 class UserSignupSerializer(serializers.ModelSerializer):
 
-    email = serializers.EmailField(source='user.email')
-    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH, source='user.username')
-    password = serializers.CharField(max_length=PASSWORD_MAX_LENGTH,
-                                     source='user.password', write_only=True)
+    default_error_messages = {
+        "required": "This field is required",
+    }
+
+    email = serializers.EmailField(
+        source='user.email',
+        # error_messages={"required": EMAIL_IS_REQUIRED}
+    )
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH,
+        source='user.username',
+        error_messages = {"required": USERNAME_IS_REQUIRED}
+    )
+    password = serializers.CharField(
+        max_length=PASSWORD_MAX_LENGTH,
+        source='user.password',
+        write_only=True,
+        error_messages={"required": PASSWORD_IS_REQUIRED}
+    )
 
     bio = serializers.CharField(required=False, read_only=True)
     first_name = serializers.CharField(source='user.first_name',
@@ -68,6 +99,9 @@ class UserSignupSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name'
         )
+        extra_kwargs = {
+            'password': {'error_messages': {'required': PASSWORD_IS_REQUIRED}}
+        }
 
     def validate_email(self, value):
         try:
@@ -182,8 +216,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(code=error.code, detail=error.detail)
 
     def update(self, instance, validated_data):
-        print('validated data: ', validated_data)
-
         for field in self.Meta.fields:
             if field in validated_data.get('user', {}):
                 setattr(instance.user, field, validated_data['user'][field])
@@ -192,7 +224,5 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
         instance.user.save()
         instance.save()
-
-        print('saved instance: ', instance)
 
         return instance

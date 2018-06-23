@@ -26,7 +26,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserSignupSerializer
 
     def get_permissions(self):
-        print('action ', self.action)
         if self.action == 'create' or self.action == 'login':
             permission_classes = [IsNotAuthenticated]
         else:
@@ -35,7 +34,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def _authenicate(self, user, json):
-        print('USER: ', user)
         try:
             token = Token.objects.get(user=user)
             Token.delete(token)
@@ -65,9 +63,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
     def login(self, request):
-        print('LOGIN')
-        print(request.data)
-
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         json = self._authenicate(user=serializer.instance.user, json=serializer.data)
@@ -82,7 +77,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             return self.request.user.user_profile
 
     def retrieve_me(self, request):
-        print(self.get_object())
         serializer = UserMeSerializer(instance=self.get_object())
         return Response(serializer.data)
 
@@ -93,19 +87,15 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        print('Request data: ', request.data)
-
         instance = self.get_object()
-        print(instance)
 
         serializer = UserUpdateSerializer(
             instance=instance,
             data=request.data,
             partial=True
         )
-        if serializer.is_valid(raise_exception=True):
-            print('Valid serializer')
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(serializer.data)
 
