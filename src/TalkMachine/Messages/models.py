@@ -25,8 +25,8 @@ class Conversation(models.Model):
         null=True
     )
 
-    last_msg_id = models.PositiveIntegerField(default=0)
-    last_msg_date = models.DateTimeField()
+    last_msg_id = models.PositiveIntegerField(default=0, blank=True)
+    last_msg_date = models.DateTimeField(null=True, blank=True)
 
     deleted = models.BooleanField(default=False)
     favourite = models.BooleanField(default=False)
@@ -78,6 +78,9 @@ class Message(models.Model):
 
     def set_is_deleted(self):
         self.is_deleted = False
+
+    def can_be_replied_to_this(self, source_message):
+        return source_message.id > self.id
 
     def __str__(self):
         return '[#{0}] - {1}'.format(self.pk, self.text)

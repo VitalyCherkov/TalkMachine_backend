@@ -1,6 +1,8 @@
 from django.utils.translation import gettext as _
 
 ACCESS_DENIED = _('Access denied')
+# If trying to reply to the message which ID >= of current
+MESSAGING_CHRONOLOGY_CONFLICT = _('Messaging chronology conflict')
 
 ROOT_MESSAGE_ID = 0
 

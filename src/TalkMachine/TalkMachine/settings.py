@@ -147,6 +147,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    # Кастомный пагинатор
     'DEFAULT_PAGINATION_CLASS': 'utils.paginators.PathPageNumberPagination',
     'PAGE_SIZE': 2
 

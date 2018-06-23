@@ -23,7 +23,8 @@ class MessagesManager(models.Manager):
     def write_to_conversation(self, from_user_profile, to_user_profile, text, parent_msg_id):
 
         # kek
-        conversation, created = ConversationsManager.model.objects.get_or_create_between(
+        from .models import Conversation
+        conversation, created = Conversation.objects.get_or_create_between(
             from_user_profile=from_user_profile,
             to_user_profile=to_user_profile
         )
@@ -36,6 +37,10 @@ class MessagesManager(models.Manager):
         )
 
         message.save()
+        message.conversation.last_msg_date = message.created
+        message.conversation.last_msg_id = message.id
+        conversation.save()
+
         return message
 
     def get_not_deleted(self, message_id):

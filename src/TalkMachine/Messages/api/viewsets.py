@@ -7,6 +7,8 @@ from UserProfile.models import UserProfile
 
 from ..models import Message, Conversation
 
+from utils.paginators import PathPaginateableViewSetMixin
+
 from .permissions import IsOwnMessage
 from .serializers import (
     MessageCreateSerializer,
@@ -16,20 +18,28 @@ from .serializers import (
 )
 
 
-class MessageViewSet(viewsets.ModelViewSet):
+class IsAuthenticatedTest(IsAuthenticated):
+    def has_permission(self, request, view):
+        res = super(IsAuthenticatedTest, self).has_permission(request, view)
+        print(res)
+        return res
+
+
+class MessageViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedTest]
     lookup_url_kwarg = 'id'
 
     def get_permissions(self):
         permissions = super(MessageViewSet, self).get_permissions()
         if self.action == 'update' or self.action == 'destroy':
             permissions += [IsOwnMessage()]
+        return permissions
 
     def get_queryset(self):
 
-        if 'conversation_id' in self.kwargs:
+        if 'conversation_id' not in self.kwargs:
             return Message.objects.get_not_deleted_queryset()
         else:
             return Message.objects.get_not_deleted_from_conversation(
@@ -37,10 +47,10 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        data += kwargs
+        data.update(kwargs)
         serializer = MessageCreateSerializer(
             data=data,
-            context=request.user.user_profile
+            context={'user_profile': request.user.user_profile}
         )
 
         serializer.is_valid(raise_exception=True)
@@ -51,7 +61,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
 
     def update(self, request, *args, **kwargs):
-        kwargs += {'partial': True}
+        kwargs.update({'partial': True})
         self.serializer_class = MessageUpdateSerializer
         return super(MessageViewSet, self).update(request, args, kwargs)
 
@@ -65,17 +75,8 @@ class MessageViewSet(viewsets.ModelViewSet):
         serializer = MessageDetailSerializer(instance)
         return response.Response(serializer.data)
 
-    # TODO: Сделать, наверное, mixin, т.к. это копипаст
-    def paginate_queryset(self, queryset):
-        # Номер страницы берется пагинатором из поля 'page' в query_params.
-        # Поэтому он туда явно записыватся из параметров пути
-        self.serializer_class = MessageShortSerializer
-        query_params = QueryDict.copy(self.request.query_params)
-        query_params.update({'page': self.kwargs['page']})
-        return self.paginator.paginate_queryset(queryset, self.request, view=self)
 
-
-class ConversationViewSet(viewsets.ModelViewSet):
+class ConversationViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = [IsAuthenticated]
@@ -84,16 +85,6 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Conversation.objects.get_conversations_by_user_profile(
             self.request.user.user_profile)
-
-    # TODO: Сделать, наверное, mixin, т.к. это копипаст
-    def paginate_queryset(self, queryset):
-        # Номер страницы берется пагинатором из поля 'page' в query_params.
-        # Поэтому он туда явно записыватся из параметров пути
-        self.serializer_class = MessageShortSerializer
-        query_params = QueryDict.copy(self.request.query_params)
-        query_params.update({'page': self.kwargs['page']})
-        return self.paginator.paginate_queryset(queryset, self.request, view=self)
-
 
 
 

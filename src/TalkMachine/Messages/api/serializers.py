@@ -5,7 +5,7 @@ from UserProfile.models import UserProfile
 from UserProfile.errors import UserDoesNotExists
 from UserProfile.api.serializers import UserShortSerializer
 
-from ..constants import ROOT_MESSAGE_ID
+from ..constants import ROOT_MESSAGE_ID, MESSAGING_CHRONOLOGY_CONFLICT
 from ..errors import MessageDoesNotExist
 
 
@@ -37,7 +37,8 @@ class MessageCreateSerializer(serializers.ModelSerializer):
             raise exceptions.ValidationError(detail=error.detail, code=error.code)
 
         # Грязненько ...
-        self.parent_msg = parent_msg
+        self.context['parent_msg_id'] = \
+            parent_msg.id if parent_msg else 0
         return value
 
     def validate_username(self, value):
@@ -48,17 +49,18 @@ class MessageCreateSerializer(serializers.ModelSerializer):
             raise exceptions.ValidationError(detail=error.detail, code=error.code)
 
         # Грязненько ...
-        self.to_user_profile = user_profile
+        self.context['to_user_profile'] = user_profile
         return value
 
     def create(self, validated_data):
         message = self.Meta.model.objects.write_to_conversation(
-            from_user_profile=self.context['user_profile'],
-            to_user_profile=self.to_user_profile,
-            parent_msg_id=self.parent_msg
+            text=validated_data['text'],
+            from_user_profile=self.context.get('user_profile'),
+            to_user_profile=self.context.get('to_user_profile'),
+            parent_msg_id=self.context.get('parent_msg_id', 0)
         )
         message.save()
-        return
+        return message
 
 
 class MessageUpdateSerializer(serializers.ModelSerializer):
@@ -79,8 +81,10 @@ class MessageUpdateSerializer(serializers.ModelSerializer):
             error = MessageDoesNotExist(value)
             raise exceptions.ValidationError(detail=error.detail, code=error.code)
 
-        # Грязненько ...
-        self.parent_msg = parent_msg
+        if not parent_msg.can_be_replied_to_this(self.instance):
+            raise exceptions.ValidationError(MESSAGING_CHRONOLOGY_CONFLICT)
+
+        self.context['parent_msg'] = parent_msg
         return value
 
     class Meta:
@@ -95,8 +99,7 @@ class MessageUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
 
         new_text = validated_data.get('text', instance.text)
-        new_parent_msg_id = \
-            self.parent_msg.id if self.parent_msg else instance.parent_msg_id
+        new_parent_msg_id = validated_data.get('parent_msg_id', instance.parent_msg_id)
 
         if new_parent_msg_id != instance.parent_msg_id or new_text != instance.text:
             instance.is_edited = True
