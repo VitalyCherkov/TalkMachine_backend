@@ -33,7 +33,8 @@ class MessageViewSet(PathPaginateableViewSetMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         permissions = super(MessageViewSet, self).get_permissions()
-        if self.action == 'update' or self.action == 'destroy':
+        own_actions = ['update', 'destroy', 'retrieve']
+        if self.action in own_actions:
             permissions += [IsOwnMessage()]
         return permissions
 
