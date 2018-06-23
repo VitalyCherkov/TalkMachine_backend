@@ -77,7 +77,9 @@ class Message(models.Model):
     objects = MessagesManager()
 
     def set_is_deleted(self):
-        self.is_deleted = False
+        print('set is deleted to {0}'.format(self))
+        self.is_deleted = True
+        self.save()
 
     def can_be_replied_to_this(self, source_message):
         return source_message.id > self.id
